@@ -6,22 +6,21 @@ import isAuth from "../middleware/isAuth.middleware.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res) => {
+router.get("/", async (req, res, next) => {
   try {
-    const users = await User.find();
+    const users = await User.find().select("-password");
     res.status(200).json(users);
   } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
-router.post("/signup", async (req, res) => {
+router.post("/signup", async (req, res, next) => {
   try {
     const { email, username, password } = req.body;
     if (!email || !username || !password) {
       return res.status(400).json({ message: "Please provide all fields" });
-      }
+    }
 
     const foundUser = await User.findOne({ $or: [{ email }, { username }] });
     if (foundUser) {
@@ -38,8 +37,10 @@ router.post("/signup", async (req, res) => {
       return;
     }
 
-    if(username.length > 16){
-        return res.status(400).json({message: "Username cannot be longer than 16 characters."})
+    if (username.length > 16) {
+      return res
+        .status(400)
+        .json({ message: "Username cannot be longer than 16 characters." });
     }
 
     const salts = await bcrypt.genSalt(10);
@@ -50,32 +51,36 @@ router.post("/signup", async (req, res) => {
       email,
       username,
       password: hashedPassword,
-    });
+    })
+    
+    const createdUserObj = createdUser.toObject();
+    delete createdUserObj.password;
 
-    res.status(201).json(createdUser);
+    res.status(201).json(createdUserObj);
   } catch (error) {
-    if (error.code === 11100) {
+    if (error.code === 11000) {
       return res.status(409).json({ message: "User already exists" });
     }
-    console.log(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
-router.post("/login", async (req, res) => {
+router.post("/login", async (req, res, next) => {
   try {
-    const { email, username, password } = req.body;
-    if ((!email && !username) || !password) {
+    const { loginInfo, password } = req.body;
+
+    if (!loginInfo || !password) {
       return res.status(400).json({
         message: "Please provide your email or username and your password",
       });
     }
-    const foundUser = await User.findOne({ $or: [{ email }, { username }] });
+    const foundUser = await User.findOne({
+      $or: [{ email: loginInfo }, { username: loginInfo }],
+    });
 
     if (!foundUser) {
       return res.status(404).json({ message: "This user does not exist" });
     }
-
     const passwordCheck = await bcrypt.compare(password, foundUser.password);
 
     if (!passwordCheck) {
@@ -89,7 +94,7 @@ router.post("/login", async (req, res) => {
     const payload = {
       _id: userObj._id,
       username: userObj.username,
-      email: userObj.email
+      email: userObj.email,
     };
 
     const token = await jwt.sign({ payload }, process.env.TOKEN_SECRET, {
@@ -101,12 +106,11 @@ router.post("/login", async (req, res) => {
       .status(200)
       .json({ message: "Logged in successfully", token, user: userObj });
   } catch (error) {
-    console.log(error);
-    res.status(500).json(error);
+    next(error);
   }
 });
 
-router.get("/verify", isAuth, (req, res) => {
+router.get("/verify", isAuth, (req, res, next) => {
   console.log(req.user);
   res.status(200).json({ user: req.user });
 });
