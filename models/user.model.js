@@ -21,6 +21,10 @@ const UserSchema = new Schema({
     type: String,
     required: true,
   },
+  tickets: {
+    type: Array,
+    required: true,
+  }
 });
 
 export default model("User", UserSchema);

@@ -2,6 +2,7 @@ import express from "express"
 import morgan from "morgan"
 import connectDB from "./db/connect.js"
 import userRoutes from "./routes/user.routes.js"
+import lottoTicketRoutes from "./routes/lottoTicket.routes.js"
 import "dotenv/config"
 import cors from "cors"
 import { errorHandler, notFoundHandler } from './middleware/errorHandling.js'
@@ -27,6 +28,8 @@ app.get("/health", (req, res) => {
 })
 
 app.use("/auth", userRoutes)
+
+app.use("/games/lotto-6of49/tickets", lottoTicketRoutes)
 
 app.listen(process.env.PORT, () => {
     console.clear()
