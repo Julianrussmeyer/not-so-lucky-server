@@ -51,12 +51,23 @@ router.post("/signup", async (req, res, next) => {
       email,
       username,
       password: hashedPassword,
-    })
-    
+    });
+
     const createdUserObj = createdUser.toObject();
     delete createdUserObj.password;
 
-    res.status(201).json(createdUserObj);
+    const payload = {
+      _id: createdUserObj._id,
+      username: createdUserObj.username,
+      email: createdUserObj.email,
+    };
+
+    const token = await jwt.sign(payload, process.env.TOKEN_SECRET, {
+      algorithm: "HS256",
+      expiresIn: "1h",
+    });
+
+    res.status(201).json({ message: "Logged in successfully", token, user: createdUserObj });
   } catch (error) {
     if (error.code === 11000) {
       return res.status(409).json({ message: "User already exists" });
@@ -97,7 +108,7 @@ router.post("/login", async (req, res, next) => {
       email: userObj.email,
     };
 
-    const token = await jwt.sign({ payload }, process.env.TOKEN_SECRET, {
+    const token = await jwt.sign(payload, process.env.TOKEN_SECRET, {
       algorithm: "HS256",
       expiresIn: "1h",
     });
