@@ -20,10 +20,6 @@ const UserSchema = new Schema({
   password: {
     type: String,
     required: true,
-  },
-  tickets: {
-    type: Array,
-    required: true,
   }
 });
 
