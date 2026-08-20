@@ -40,7 +40,7 @@ const LottoTicketSchema = new Schema({
       message: "A ticket must contain between 1 and 12 selections.",
     },
   },
-  supernumber: {
+  superNumber: {
     type: Number,
     required: true,
     validate: {

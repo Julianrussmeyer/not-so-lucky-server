@@ -17,12 +17,12 @@ router.get("/", isAuth, async (req, res, next) => {
 // POST /lotto-tickets — create
 router.post("/", isAuth, async (req, res, next) => {
   try {
-    const { name, selections, supernumber, drawsPerWeek, durationWeeks } =
+    const { name, selections, superNumber, drawsPerWeek, durationWeeks } =
       req.body;
     if (
       !selections ||
-      supernumber === undefined ||
-      supernumber === null ||
+      superNumber === undefined ||
+      superNumber === null ||
       !drawsPerWeek ||
       !durationWeeks
     ) {
@@ -32,7 +32,7 @@ router.post("/", isAuth, async (req, res, next) => {
     const createdLottoTicket = await LottoTicket.create({
       name,
       selections,
-      supernumber,
+      superNumber,
       drawsPerWeek,
       durationWeeks,
       owner: req.user._id,
