@@ -59,6 +59,7 @@ const LottoTicketSchema = new Schema({
     type: Number,
     required: true,
     default: 1,
+    max: [5200, "A ticket cannot simulate more than 100 years."],
     validate: {
       validator: function (v) {
         return Number.isInteger(v) && v >= 1;

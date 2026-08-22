@@ -114,63 +114,34 @@ export function evaluateTicket(ticket, draw) {
   return { ticketId, selectionResults };
 }
 
-const testTicket = {
-  _id: "test-ticket-1",
-  name: "Test Ticket",
-  selections: [
-    {
-      _id: "selection-1",
-      numbers: [1, 2, 3, 4, 10, 12],
-    },
-    {
-      _id: "selection-2",
-      numbers: [10, 13, 20, 30, 41, 49],
-    },
-  ],
-  superNumber: 9,
-  drawsPerWeek: 2,
-  durationWeeks: 1,
-};
-
-const testDraws = [
-  {
-    drawnNumbers: [10, 12, 13, 20, 30, 40],
-    drawnSuperNumber: 9,
-  },
-  {
-    drawnNumbers: [1, 2, 3, 4, 41, 49],
-    drawnSuperNumber: 0,
-  },
-];
-
 export function simulateTicket(ticket) {
   const numDraws = ticket.drawsPerWeek * ticket.durationWeeks;
   let ticketWin = 0;
   let winningDraws = [];
   for (let i = 0; i < numDraws; i++) {
-    // const draw = generateDraw();
-    const draw = testDraws[i];
+    const draw = generateDraw();
     const drawResult = evaluateTicket(ticket, draw);
-    console.log(drawResult);
     const drawWin = drawResult.selectionResults.reduce(
       (sumWins, win) => sumWins + win.selectionWin,
       0,
     );
     ticketWin += drawWin;
-    if(drawWin){
-      winningDraws.push(drawWin)
+    if (drawWin) {
+      winningDraws.push({
+        drawNumber: i + 1,
+        draw,
+        selectionResults: drawResult.selectionResults,
+        drawWin,
+      });
     }
   }
   const ticketCost = calcTicketCost(ticket);
   const ticketProfit = ticketWin - ticketCost;
   return {
+    numberOfDraws: numDraws,
     ticketWin,
     ticketCost,
     ticketProfit,
-    winningDraws
+    winningDraws,
   };
 }
-
-const testSimulation = simulateTicket(testTicket);
-console.log("### Ticket Simulation ###");
-console.log(testSimulation);

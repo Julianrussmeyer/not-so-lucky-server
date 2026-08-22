@@ -1,8 +1,11 @@
 import express from "express";
 import LottoTicket from "../models/lottoTicket.model.js";
 import isAuth from "../middleware/isAuth.middleware.js";
+import { simulateTicket } from "../utils/lotto6of49Simulation.js";
 
 const router = express.Router();
+
+const MAX_TICKETS_PER_USER = 6;
 
 // GET /lotto-tickets — get the user’s tickets
 router.get("/", isAuth, async (req, res, next) => {
@@ -19,6 +22,7 @@ router.post("/", isAuth, async (req, res, next) => {
   try {
     const { name, selections, superNumber, drawsPerWeek, durationWeeks } =
       req.body;
+
     if (
       !selections ||
       superNumber === undefined ||
@@ -27,6 +31,17 @@ router.post("/", isAuth, async (req, res, next) => {
       !durationWeeks
     ) {
       return res.status(400).json({ message: "Please provide all fields" });
+    }
+
+    const currentNumberOfTickets = await LottoTicket.countDocuments({
+      owner: req.user._id,
+    });
+
+    if (currentNumberOfTickets >= MAX_TICKETS_PER_USER) {
+      return res.status(409).json({
+        message:
+          "You've reached the maximum amount of tickets. Delete or edit old tickets.",
+      });
     }
 
     const createdLottoTicket = await LottoTicket.create({
@@ -125,6 +140,29 @@ router.patch("/:ticketId", isAuth, async (req, res, next) => {
     res.status(200).json({
       message: "Ticket updated",
       lottoTicket: updatedTicket,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// POST /games/lotto-6of49/tickets/:ticketId/simulate
+router.post("/:ticketId/simulate", isAuth, async (req, res, next) => {
+  try {
+    const filter = {
+      _id: req.params.ticketId,
+      owner: req.user._id,
+    };
+    const ticket = await LottoTicket.findOne(filter);
+    if (!ticket) {
+      return res
+        .status(404)
+        .json({ message: "Ticket doesn't exist or you are not the owner." });
+    }
+    const simulation = simulateTicket(ticket);
+    return res.status(200).json({
+      message: "Ticket simulated successfully.",
+      simulation,
     });
   } catch (error) {
     next(error);
