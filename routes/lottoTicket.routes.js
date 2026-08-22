@@ -64,7 +64,6 @@ router.get("/:ticketId", isAuth, async (req, res, next) => {
     res.status(200).json({ ticketDetails });
   } catch (error) {
     next(error);
-    console.log(error);
   }
 });
 
@@ -86,6 +85,43 @@ router.delete("/:ticketId", isAuth, async (req, res, next) => {
   } catch (error) {
     next(error);
     console.log(error);
+  }
+});
+
+// PATCH /lotto-tickets/:ticketId — update one
+router.patch("/:ticketId", isAuth, async (req, res, next) => {
+  const allowedFields = [
+    "name",
+    "selections",
+    "superNumber",
+    "drawsPerWeek",
+    "durationWeeks",
+  ];
+
+  const updates = {};
+
+  allowedFields.forEach((field) => {
+    if (req.body[field] !== undefined) {
+      updates[field] = req.body[field];
+    }
+  });
+  try {
+    const filter = {
+      _id: req.params.ticketId,
+      owner: req.user._id,
+    };
+    const result = await LottoTicket.updateOne(
+      filter,
+      { $set: updates },
+      { runValidators: true },
+    );
+    if (result.matchedCount === 1) {
+      res.status(200).json({ message: "Ticket updated" });
+    } else {
+      res.status(404).json({ message: "Ticket not found" });
+    }
+  } catch (error) {
+    next(error);
   }
 });
 
