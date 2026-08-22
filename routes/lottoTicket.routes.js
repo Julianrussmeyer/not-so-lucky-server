@@ -110,16 +110,22 @@ router.patch("/:ticketId", isAuth, async (req, res, next) => {
       _id: req.params.ticketId,
       owner: req.user._id,
     };
-    const result = await LottoTicket.updateOne(
+    const updatedTicket = await LottoTicket.findOneAndUpdate(
       filter,
       { $set: updates },
-      { runValidators: true },
+      {
+        new: true,
+        runValidators: true,
+      },
     );
-    if (result.matchedCount === 1) {
-      res.status(200).json({ message: "Ticket updated" });
-    } else {
-      res.status(404).json({ message: "Ticket not found" });
+    if (!updatedTicket) {
+      return res.status(404).json({ message: "Ticket not found" });
     }
+
+    res.status(200).json({
+      message: "Ticket updated",
+      lottoTicket: updatedTicket,
+    });
   } catch (error) {
     next(error);
   }
