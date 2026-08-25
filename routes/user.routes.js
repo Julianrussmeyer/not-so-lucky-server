@@ -6,15 +6,6 @@ import isAuth from "../middleware/isAuth.middleware.js";
 
 const router = express.Router();
 
-router.get("/", async (req, res, next) => {
-  try {
-    const users = await User.find().select("-password");
-    res.status(200).json(users);
-  } catch (error) {
-    next(error);
-  }
-});
-
 router.post("/signup", async (req, res, next) => {
   try {
     const { email, username, password } = req.body;
