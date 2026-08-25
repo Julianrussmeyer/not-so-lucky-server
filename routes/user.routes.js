@@ -89,7 +89,6 @@ router.post("/login", async (req, res, next) => {
       return res.status(401).json({ message: "Password incorrect" });
     }
 
-    // foundUser is a mongoose document. Transform to a JS object and delete password
     const userObj = foundUser.toObject();
     delete userObj.password;
 

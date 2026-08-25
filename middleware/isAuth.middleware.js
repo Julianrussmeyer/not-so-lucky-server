@@ -12,10 +12,10 @@ export default function isAuth(req, res, next) {
       req.user = payload;
       next();
     } else {
-      res.status(400).json({ message: "Invalid Token" });
+      res.status(401).json({ message: "Invalid Token" });
     }
   } catch (error) {
     console.log(error);
-    res.status(500).json({ error, message: "Invalid Token" });
+    res.status(401).json({ error, message: "Invalid Token" });
   }
 }
