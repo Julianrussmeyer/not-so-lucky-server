@@ -31,11 +31,12 @@ app.use("/auth", userRoutes)
 
 app.use("/games/lotto-6of49/tickets", lottoTicketRoutes)
 
+app.use(notFoundHandler);
+app.use(errorHandler);
+
+await connectDB();
+
 app.listen(process.env.PORT, () => {
     console.clear()
     console.log("Server running on port " + process.env.PORT)
-    connectDB()
 })
-
-app.use(notFoundHandler);
-app.use(errorHandler);
