@@ -2,6 +2,7 @@ import express from "express";
 import LottoTicket from "../models/lottoTicket.model.js";
 import isAuth from "../middleware/isAuth.middleware.js";
 import { simulateTicket } from "../utils/lotto6of49Simulation.js";
+import User from "../models/user.model.js";
 
 const router = express.Router();
 
@@ -160,6 +161,15 @@ router.post("/:ticketId/simulate", isAuth, async (req, res, next) => {
         .json({ message: "Ticket doesn't exist or you are not the owner." });
     }
     const simulation = simulateTicket(ticket);
+
+    const updatedUserStats = await User.findByIdAndUpdate(req.user._id, {
+      $inc: {
+        "stats.totalDraws": simulation.numberOfDraws,
+        "stats.totalSpentCents": simulation.ticketCost,
+        "stats.totalWonCents": simulation.ticketWin,
+      },
+    });
+
     return res.status(200).json({
       message: "Ticket simulated successfully.",
       simulation,

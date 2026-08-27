@@ -2,6 +2,21 @@ import { Schema, model } from "mongoose";
 
 const emailRegex = /[^@ \t\r\n]+@[^@ \t\r\n]+\.[^@ \t\r\n]+/;
 
+const StatsSchema = new Schema({
+  totalDraws: {
+    type: Number,
+    default: 0,
+  },
+  totalSpentCents: {
+    type: Number,
+    default: 0,
+  },
+  totalWonCents: {
+    type: Number,
+    default: 0,
+  },
+});
+
 const UserSchema = new Schema({
   username: {
     type: String,
@@ -20,7 +35,11 @@ const UserSchema = new Schema({
   password: {
     type: String,
     required: true,
-  }
+  },
+  stats: {
+    type: StatsSchema,
+    default: () => ({}),
+  },
 });
 
 export default model("User", UserSchema);

@@ -58,7 +58,9 @@ router.post("/signup", async (req, res, next) => {
       expiresIn: "1h",
     });
 
-    res.status(201).json({ message: "Logged in successfully", token, user: createdUserObj });
+    res
+      .status(201)
+      .json({ message: "Logged in successfully", token, user: createdUserObj });
   } catch (error) {
     if (error.code === 11000) {
       return res.status(409).json({ message: "User already exists" });
@@ -111,8 +113,17 @@ router.post("/login", async (req, res, next) => {
   }
 });
 
-router.get("/verify", isAuth, (req, res, next) => {
+router.get("/verify", isAuth, (req, res) => {
   res.status(200).json({ user: req.user });
+});
+
+router.get("/stats", isAuth, async (req, res, next) => {
+  try {
+    const user = await User.findById(req.user._id)
+    res.status(200).json({ stats: user.stats });
+  } catch (error) {
+    next(error);
+  }
 });
 
 export default router;
