@@ -1,4 +1,4 @@
-# NotSoLucky — Server
+# NotSoLucky - Server
 
 This repository contains the Express and MongoDB API for [NotSoLucky](https://github.com/Julianrussmeyer/not-so-lucky-client), an educational German Lotto 6aus49 simulator. The application helps users explore the long-term cost and low probability of lottery play without spending real money.
 
